@@ -40,7 +40,7 @@ def main():
 
 	#This is not properly formatted yet
 	report.write("4. Number of Subdomains in ics.uci.edu Domain: "+str(len(ics_subdomains)))
-	sorted_ics_subdomains = sorted([(urlparse(sd),np) for sd,np in ics_subdomains.items()], key=lambda x: x[0].netloc)
+	sorted_ics_subdomains = sorted([(urlparse(sd),np) for sd,np in ics_subdomains.items()], key=lambda x: x[0].netloc.strip('www.'))
 	for d in sorted_ics_subdomains:
 		report.write(d[0].geturl()+', '+str(d[1]))
 
