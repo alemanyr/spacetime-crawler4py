@@ -3,66 +3,45 @@ from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urlparse
 
-# Global vars for storing report question info
 unique_urls = set() # set of unique urls
-longest_page = ('name', 0) # tuple of page name and word count
-word_freq = dict() # word: freq
-ics_subdomains = dict() # subdomain: pages per subdomain
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
 def extract_next_links(url, resp):
-	global unique_urls, longest_page, word_freq, ics_subdomains
+	global unique_urls
 	next_links = list()
 
-	if 200 <= resp.status <= 202:
-		# Add url to set of unique URLs
-		# Parsing and re-getting the url clears any formatting differences + discards fragment
-		parsed_url = urlparse.urlsplit(url)
-		unique_urls.add(parsed_url.geturl())
+	with open("content.txt", 'a', encoding="utf-8") as content_file:
+		if 200 <= resp.status <= 202:
+			# Add url to set of unique URLs
+			# Parsing and re-getting the url clears any formatting differences + discards fragment
+			parsed_url = urlparse.urlsplit(url)
+			unique_urls.add(parsed_url.geturl())
 
-		# Update ics_subdomains dict if necessary
-		# This will split the path as such: http://vision.ics.uci.edu/projects.html -> ['vision','ics','uci','edu']
-		split_url_path = parsed_url.path.split('/')[0].split('.')
-		# If the page is an ics.uci.edu subdomain
-		if len(split_url_path) >= 4 and '.'.join(split_url_path[-3:-1]) == 'ics.uci.edu':
-			# Update the ics_subdomains dict
-			full_subdomain = '.'.join(split_url_path)
-			if full_subdomain in ics_subdomains:
-				ics_subdomains[full_subdomain] += 1
-			else:
-				ics_subdomains[full_subdomain] = 1
+			soup = BeautifulSoup(resp.raw_response.content, 'lxml')
 
-		soup = BeautifulSoup(resp.raw_response.content, 'lxml')
+			a_tags = soup.find_all('a')
+			# Extract URLs from <a> tags + append to next_links
+			for tag in a_tags:
+				tag_url = tag.get('href')
+				# Parse + format URL, removing fragment
+				formatted_tag_url = urlparse.urlsplit(tag_url).geturl()
+				# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
+				# TODO Also don't add url to next_links if it's not within the project subdomains
+				if not (formatted_tag_url in unique_urls):
+					next_links.append(formatted_tag_url)
 
-		# Extract all <a> tags (hyperlink tags)
-		a_tags = soup.find_all('a')
-		# Extract URLs from <a> tags + append to next_links
-		for tag in a_tags:
-			tag_url = tag.get('href')
-			# Parse + format URL, removing fragment
-			formatted_tag_url = urlparse.urlsplit(tag_url).geturl()
-			# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
-			# TODO Also don't add url to next_links if it's not within the project subdomains
-			if not (formatted_tag_url in unique_urls):
-				next_links.append(formatted_tag_url)
+			# Store all words from webpage
+			words = []
+			for word in re.finditer(r"[0-9a-zA-Z'-]*[0-9a-zA-Z']+", soup.get_text()):
+	            word = word.group(0).lower()
+	            words.append(word)
 
-		# Counts number of words per page
-		# Updates word frequency
-		word_count = 0
-		for word in re.finditer(r"[0-9a-zA-Z'-]+", soup.get_text()):
-            word_count += 1
-            word = word.group(0).lower()
-            if word in word_freq:
-                word_freq[word] += 1
-            else:
-                word_freq[word] = 1
-
-		# Update longest page variable if necessary
-		if word_count > longest_page[1]:
-			longest_page = (parsed_url, word_count)
+	        # Write to content.txt (data formatted as: <url> | <word list>)
+	       	content_file.write(parsed_url.geturl()+'|'+str(words)+'\n')
+	            
 	return next_links
 
 def is_valid(url):
