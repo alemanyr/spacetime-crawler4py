@@ -17,7 +17,7 @@ def extract_next_links(url, resp):
 	global unique_urls, longest_page, word_freq, ics_subdomains
 	next_links = list()
 
-	with open(url) as html_file:
+	if 200 <= resp.status <= 202:
 		# Add url to set of unique URLs
 		# Parsing and re-getting the url clears any formatting differences + discards fragment
 		parsed_url = urlparse.urlsplit(url)
@@ -35,7 +35,7 @@ def extract_next_links(url, resp):
 			else:
 				ics_subdomains[full_subdomain] = 1
 
-		soup = BeautifulSoup(html_file, 'lxml')
+		soup = BeautifulSoup(resp.raw_response.content, 'lxml')
 
 		# Extract all <a> tags (hyperlink tags)
 		a_tags = soup.find_all('a')
