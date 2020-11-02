@@ -27,7 +27,7 @@ def main():
 
 			parsed_url = urlparse(content[0])
 			url_netloc = parsed_url.netloc.split('.')
-			if len(url_netloc) >= 4 and '.'.join(url_netloc[-3:-1]) == 'ics.uci.edu':
+			if url_netloc.endswith('ics.uci.edu'):
 				full_subdomain=parsed_url.geturl()
 				if full_subdomain in ics_subdomains:
 					ics_subdomains[full_subdomain]+=1
