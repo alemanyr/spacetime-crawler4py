@@ -52,13 +52,13 @@ def extract_next_links(url, resp):
 		# Counts number of words per page
 		# Updates word frequency
 		word_count = 0
-		for word in re.finditer(r"(?=\S*['-])([a-zA-Z'-]+)", soup.get_text())
+		for word in re.finditer(r"[0-9a-zA-Z'-]+", soup.get_text()):
 			word_count += 1
 			word.lower()
 			if word in word_freq:
 				word_freq[word] += 1
 			else:
-				word_freq = 1
+				word_freq[word] = 1
 
 		# Update longest page variable if necessary
 		if word_count > longest_page[1]:
