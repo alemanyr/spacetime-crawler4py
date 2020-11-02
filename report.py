@@ -26,13 +26,9 @@ def main():
 					word_freq[word]+=1
 
 			parsed_url = urlparse(content[0])
-			url_netloc = parsed_url.netloc.split('.')
+			url_netloc = parsed_url.netloc
 			if url_netloc.endswith('ics.uci.edu'):
-				full_subdomain=parsed_url.geturl()
-				if full_subdomain in ics_subdomains:
-					ics_subdomains[full_subdomain]+=1
-				else:
-					ics_subdomains[full_subdomain]=1
+				ics_subdomains[url_netloc]+=1
 
 	
 	report.write("1. Number of Unique Pages: "+str(num_unique_pages)+'\n')
