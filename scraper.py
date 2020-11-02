@@ -17,7 +17,7 @@ def extract_next_links(url, resp):
 		if 200 <= resp.status <= 202:
 			# Add url to set of unique URLs
 			# Parsing and re-getting the url clears any formatting differences + discards fragment
-			parsed_url = urlparse.urlsplit(url)
+			parsed_url = urlparse(url)
 			unique_urls.add(parsed_url.geturl())
 
 			soup = BeautifulSoup(resp.raw_response.content, 'lxml')
@@ -27,7 +27,7 @@ def extract_next_links(url, resp):
 			for tag in a_tags:
 				tag_url = tag.get('href')
 				# Parse + format URL, removing fragment
-				formatted_tag_url = urlparse.urlsplit(tag_url).geturl()
+				formatted_tag_url = urlparse(tag_url).geturl()
 				# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
 				# TODO Also don't add url to next_links if it's not within the project subdomains
 				if not (formatted_tag_url in unique_urls):
@@ -39,7 +39,7 @@ def extract_next_links(url, resp):
 	            word = word.group(0).lower()
 	            words.append(word)
 
-	        # Write to content.txt (data formatted as: <url> | <word list>)
+	        # Write to content.txt (data formatted as: <url>|<word list>)
 	       	content_file.write(parsed_url.geturl()+'|'+str(words)+'\n')
 	            
 	return next_links
