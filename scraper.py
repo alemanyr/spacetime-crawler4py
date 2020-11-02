@@ -51,20 +51,18 @@ def extract_next_links(url, resp):
 
 		# TODO create list of all words on page(not just unique words, all words)
 		# should eliminate capitalization, etc.
-		word_list = list()
-
-		# Update longest page variable if necessary
-		if len(word_list) > longest_page[1]:
-			longest_page = (parsed_url, len(word_list))
-
-		# Update word frequency dictionary
-		# TODO filter stop words here? Or later?
-		for word in word_list:
+		
+		word_count = 0
+		for word in re.finditer(r"(?=\S*['-])([a-zA-Z'-]+)", soup.get_text())
+			word_count += 1
 			if word in word_freq:
 				word_freq[word] += 1
 			else:
-				word_freq[word] = 1
+				word_freq = 1
 
+		# Update longest page variable if necessary
+		if word_count > longest_page[1]:
+			longest_page = (parsed_url, word_count)
 	return next_links
 
 def is_valid(url):
