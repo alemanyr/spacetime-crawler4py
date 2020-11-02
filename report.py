@@ -25,9 +25,10 @@ def main():
 				if word not in stop_words:
 					word_freq[word]+=1
 
-			split_url_path = content[0].path.split('/')[0].split('.')
-			if len(split_url_path) >= 4 and '.'.join(split_url_path[-3:-1]) == 'ics.uci.edu':
-				full_subdomain='.'.join(split_url_path)
+			parsed_url = urlparse(content[0])
+			url_netloc = parsed_url.netloc.split('.')
+			if len(url_netloc) >= 4 and '.'.join(url_netloc[-3:-1]) == 'ics.uci.edu':
+				full_subdomain=parsed_url.geturl()
 				if full_subdomain in ics_subdomains:
 					ics_subdomains[full_subdomain]+=1
 				else:
@@ -36,16 +37,16 @@ def main():
 	
 	report.write("1. Number of Unique Pages: "+str(num_unique_pages)+'\n')
 	report.write("2. Longest Page: "+longest_page[0]+" with "+str(longest_page[1])+" pages\n")
-	sorted_word_freq = sorted([(word, freq) for word,freq in word_freq.items()], key=lambda x: x[1])
+	sorted_word_freq = sorted([(word, freq) for word,freq in word_freq.items()], key=lambda x: -x[1])
 	report.write("3. 50 Most Common Words\n")
 	for i in range(50):
 		report.write(sorted_word_freq[i][0]+'\n')
 
 	#This is not properly formatted yet
 	report.write("4. Number of Subdomains in ics.uci.edu Domain: "+str(len(ics_subdomains)))
-	sorted_ics_subdomains = sorted([(sd,np) for sd,np in ics_subdomains.items()], key=lambda x: x[0])
+	sorted_ics_subdomains = sorted([(urlparse(sd),np) for sd,np in ics_subdomains.items()], key=lambda x: x[0].netloc)
 	for d in sorted_ics_subdomains:
-		report.write(d[0]+', '+str(d[1]))
+		report.write(d[0].geturl()+', '+str(d[1]))
 
 
 if __name__ is "__main__":
