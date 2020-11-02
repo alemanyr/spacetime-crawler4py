@@ -49,12 +49,12 @@ def extract_next_links(url, resp):
 			if not (formatted_tag_url in unique_urls):
 				next_links.append(formatted_tag_url)
 
-		# TODO create list of all words on page(not just unique words, all words)
-		# should eliminate capitalization, etc.
-		
+		# Counts number of words per page
+		# Updates word frequency
 		word_count = 0
 		for word in re.finditer(r"(?=\S*['-])([a-zA-Z'-]+)", soup.get_text())
 			word_count += 1
+			word.lower()
 			if word in word_freq:
 				word_freq[word] += 1
 			else:
