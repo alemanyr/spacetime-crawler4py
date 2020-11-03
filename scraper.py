@@ -63,7 +63,7 @@ def is_valid(url):
             return False
         if not valid_domain(parsed):
         	return False
-        parsed_url_path = parsed.path.lower().split()
+        parsed_url_path = parsed.path.lower().split('/')
         for p in parsed_url_path:
         	if p in illegal_paths:
         		return False
