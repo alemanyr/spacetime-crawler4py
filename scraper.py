@@ -15,12 +15,18 @@ def extract_next_links(url, resp):
 	next_links = list()
 
 	with open("content.txt", 'a', encoding="utf-8") as content_file:
-		if (200 <= resp.status <= 599) and ('text/html' in resp.raw_response.headers['content-type']):
+		if (200 <= resp.status <= 599) \
+		    and ('text/html' in resp.raw_response.headers['content-type']) \
+		    and (resp.status != 404):
 			
 			# Add url to set of unique URLs
 			# Parsing and re-getting the url clears any formatting differences + discards fragment
 			parsed_url = urlparse(url, allow_fragments=False)
 			unique_urls.add(parsed_url.geturl())
+
+			# TODO: Implement Similarity Checking to avoid crawling similar pages with no content
+
+			# TODO: Make sure this redirect check works properly
 
 			# Check if current url is redirect
 			if resp.status == 302:
@@ -29,6 +35,8 @@ def extract_next_links(url, resp):
 					next_links.append(formatted_redirect_url)
 
 			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
+
+			# TODO: Check for low content pages before scraping for links
 
 			a_tags = soup.find_all('a')
 			# Extract URLs from <a> tags + append to next_links
@@ -76,7 +84,6 @@ def is_valid(url):
             return False
         if not valid_domain(parsed):
         	return False
-
         return not (re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
