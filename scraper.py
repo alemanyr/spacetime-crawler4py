@@ -36,8 +36,8 @@ def extract_next_links(url, resp):
 			# Store all words from webpage
 			words = []
 			for word in re.finditer(r"[0-9a-zA-Z'-]*[0-9a-zA-Z']+", soup.get_text()):
-	            word = word.group(0).lower()
-	            words.append(word)
+				word = word.group(0).lower()
+				words.append(word)
 
 	        # Write to content.txt (data formatted as: <url>|<word list>)
 	       	content_file.write(parsed_url.geturl()+'|'+str(words)+'\n')
