@@ -15,16 +15,18 @@ def extract_next_links(url, resp):
 	next_links = list()
 
 	with open("content.txt", 'a', encoding="utf-8") as content_file:
-		if (200 <= resp.status <= 202) and ('text/html' in resp.raw_response.headers['content-type']):
-			# Check if current url is redirect
-			if resp.url != url:
-				formmated_redirect_url = urlparse(resp.url, allow_fragments=False).geturl()
-				if not (formmated_redirect_url in unique_urls):
-					next_links.append(parsed_redirect.geturl())
+		if (200 <= resp.status <= 599) and ('text/html' in resp.raw_response.headers['content-type']):
+			
 			# Add url to set of unique URLs
 			# Parsing and re-getting the url clears any formatting differences + discards fragment
 			parsed_url = urlparse(url, allow_fragments=False)
 			unique_urls.add(parsed_url.geturl())
+
+			# Check if current url is redirect
+			if resp.status == 302:
+				formatted_redirect_url = urlparse(resp.raw_response.url, allow_fragments=False).geturl()
+				if not (formatted_redirect_url in unique_urls):
+					next_links.append(formatted_redirect_url)
 
 			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 
@@ -54,13 +56,22 @@ def valid_domain(parsed_url):
 	# Use the www. stripped netloc to check for domains that are not crawlable
 	if netloc.startswith("www."):
 		netloc = netloc.strip("www.")
+
+	# Traps Crawler (going to the next day)
+	if (netloc == "wics.ics.uci.edu") and ("/events/" in parsed_url.path):
+		return False
+
 	return any(netloc.endswith(i) for i in project_subdomains) 
 
 def is_valid(url):
     try:
         parsed = urlparse(url)
+        parsed_path = parsed.path.lower()
+        parsed_query = parsed.query.lower()
         if parsed.fragment != '':
         	return False
+        # if "action=" in parsed_query:
+        # 	return False
         if parsed.scheme not in set(["http", "https"]):
             return False
         if not valid_domain(parsed):
@@ -74,7 +85,7 @@ def is_valid(url):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz|r)$", parsed.path.lower()) \
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz|ppsx|r|java|in|py)$", parsed_path) \
         	or re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -83,7 +94,7 @@ def is_valid(url):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz|r)$", parsed.query.lower()))
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz|ppsx|r|java|in|py)$", parsed_query))
 
     except TypeError:
         print ("TypeError for ", parsed)
