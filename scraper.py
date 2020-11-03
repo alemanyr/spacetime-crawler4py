@@ -24,6 +24,10 @@ def extract_next_links(url, resp):
 			parsed_url = urlparse(url, allow_fragments=False)
 			unique_urls.add(parsed_url.geturl())
 
+			# TODO: Checking for very large files with low information value
+
+			# TODO: Checking for dead links: resp.status of 200 but no content
+
 			# TODO: Implement Similarity Checking to avoid crawling similar pages with no content
 
 			# TODO: Make sure this redirect check works properly
@@ -65,9 +69,11 @@ def valid_domain(parsed_url):
 	if netloc.startswith("www."):
 		netloc = netloc.strip("www.")
 
-	# Traps Crawler (going to the next day)
+	# Traps Crawler (keeps going to the page of the next day next day)
 	if (netloc == "wics.ics.uci.edu") and ("/events/" in parsed_url.path):
 		return False
+
+	# TODO: make sure that there are no pages being skipped
 
 	return any(netloc.endswith(i) for i in project_subdomains) 
 
