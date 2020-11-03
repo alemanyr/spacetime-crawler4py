@@ -23,7 +23,7 @@ def extract_next_links(url, resp):
 		if 200 <= resp.status <= 202:
 			# Add url to set of unique URLs
 			# Parsing and re-getting the url clears any formatting differences + discards fragment
-			parsed_url = urlparse(url)
+			parsed_url = urlparse(url, allow_fragmens=False)
 			unique_urls.add(parsed_url.geturl())
 
 			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
@@ -33,7 +33,7 @@ def extract_next_links(url, resp):
 			for tag in a_tags:
 				tag_url = tag.get('href')
 				# Parse + format URL, removing fragment
-				formatted_tag_url = urlparse(tag_url).geturl()
+				formatted_tag_url = urlparse(tag_url, allow_fragmens=False).geturl()
 				# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
 				# Also don't add url to next_links if it's not within the project subdomains
 				if not (formatted_tag_url in unique_urls):
@@ -59,6 +59,8 @@ def valid_domain(parsed_url):
 def is_valid(url):
     try:
         parsed = urlparse(url)
+        if parsed.fragment != '':
+        	return False
         if parsed.scheme not in set(["http", "https"]):
             return False
         if not valid_domain(parsed):
