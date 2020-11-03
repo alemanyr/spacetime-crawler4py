@@ -5,11 +5,11 @@ from urllib.parse import urlparse
 
 unique_urls = set() # set of unique urls
 project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu")
-illegal_paths = ("css","js","bmp","gif","jpe?g","jpeg","ico","png","tiff?","mid","mp2","mp3","mp4", \
-				"wav","avi","mov","mpeg","ram","m4v","mkv","ogg","ogv","pdf","ps","eps","tex","ppt", \
-				"pptx","doc","docx","xls","xlsx","names","data","dat","exe","bz2","tar","msi","bin", \
-				"7z","psd","dmg","iso","epub","dll","cnf","tgz","sha1","thmx","mso","arff","rtf","jar", \
-				"csv","rm","smil","wmv","swf","wma","zip","rar","gz")
+# illegal_paths = ("css","js","bmp","gif","jpe?g","jpeg","ico","png","tiff?","mid","mp2","mp3","mp4", \
+# 				"wav","avi","mov","mpeg","ram","m4v","mkv","ogg","ogv","pdf","ps","eps","tex","ppt", \
+# 				"pptx","doc","docx","xls","xlsx","names","data","dat","exe","bz2","tar","msi","bin", \
+# 				"7z","psd","dmg","iso","epub","dll","cnf","tgz","sha1","thmx","mso","arff","rtf","jar", \
+# 				"csv","rm","smil","wmv","swf","wma","zip","rar","gz")
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -20,7 +20,7 @@ def extract_next_links(url, resp):
 	next_links = list()
 
 	with open("content.txt", 'a', encoding="utf-8") as content_file:
-		if 200 <= resp.status <= 202 and resp.raw_response.headers["content-type"] == "html":
+		if (200 <= resp.status <= 202) and ('text/html' in resp.raw_response.headers['content-type']):
 			# Add url to set of unique URLs
 			# Parsing and re-getting the url clears any formatting differences + discards fragment
 			parsed_url = urlparse(url, allow_fragments=False)
@@ -65,11 +65,8 @@ def is_valid(url):
             return False
         if not valid_domain(parsed):
         	return False
-        parsed_url_path = parsed.path.lower().split('/')
-        for p in parsed_url_path:
-        	if p in illegal_paths:
-        		return False
-        return not re.match(
+
+        return not (re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
@@ -77,7 +74,16 @@ def is_valid(url):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()) \
+        	or re.match(
+            r".*\.(css|js|bmp|gif|jpe?g|ico"
+            + r"|png|tiff?|mid|mp2|mp3|mp4"
+            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
+            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
+            + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
+            + r"|epub|dll|cnf|tgz|sha1"
+            + r"|thmx|mso|arff|rtf|jar|csv"
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.query.lower()))
 
     except TypeError:
         print ("TypeError for ", parsed)
