@@ -5,6 +5,12 @@ from urllib.parse import urlparse
 
 unique_urls = set() # set of unique urls
 project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu")
+illegal_paths = ("css","js","bmp","gif","jpe?g","jpeg","ico","png","tiff?","mid","mp2","mp3","mp4", \
+				"wav","avi","mov","mpeg","ram","m4v","mkv","ogg","ogv","pdf","ps","eps","tex","ppt", \
+				"pptx","doc","docx","xls","xlsx","names","data","dat","exe","bz2","tar","msi","bin", \
+				"7z","psd","dmg","iso","epub","dll","cnf","tgz","sha1","thmx","mso","arff","rtf","jar", \
+				"csv","rm","smil","wmv","swf","wma","zip","rar","gz")
+
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
@@ -57,6 +63,10 @@ def is_valid(url):
             return False
         if not valid_domain(parsed):
         	return False
+        parsed_url_path = parsed.path.lower().split()
+        for p in parsed_url_path:
+        	if p in illegal_paths:
+        		return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
