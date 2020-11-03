@@ -20,7 +20,7 @@ def extract_next_links(url, resp):
 			parsed_url = urlparse(url)
 			unique_urls.add(parsed_url.geturl())
 
-			soup = BeautifulSoup(resp.raw_response.content, 'lxml')
+			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 
 			a_tags = soup.find_all('a')
 			# Extract URLs from <a> tags + append to next_links
