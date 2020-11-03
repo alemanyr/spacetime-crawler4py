@@ -4,7 +4,7 @@ import requests
 from urllib.parse import urlparse
 
 unique_urls = set() # set of unique urls
-project_subdomains = [".ics.uci.edu/", ".cs.uci.edu/", ".informatics.uci.edu/", ".stat.uci.edu/", "today.uci.edu/department/information_computer_sciences/"]
+project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu")
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
@@ -30,7 +30,7 @@ def extract_next_links(url, resp):
 				formatted_tag_url = urlparse(tag_url).geturl()
 				# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
 				# Also don't add url to next_links if it's not within the project subdomains
-				if not (formatted_tag_url in unique_urls) and any(i in formatted_tag_url for i in project_subdomains):
+				if not (formatted_tag_url in unique_urls):
 					next_links.append(formatted_tag_url)
 
 			# Store all words from webpage
@@ -43,11 +43,20 @@ def extract_next_links(url, resp):
 	            
 	return next_links
 
+def valid_domain(parsed_url):
+	netloc = parsed_url.netloc
+	# Use the www. stripped netloc to check for domains that are not crawlable
+	if netloc.startswith("www."):
+		netloc = netloc.strip("www.")
+	return any(netloc.endswith(i) for i in project_subdomains) 
+
 def is_valid(url):
     try:
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
+        if not valid_domain(parsed):
+        	return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
