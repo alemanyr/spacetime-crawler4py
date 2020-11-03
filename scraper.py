@@ -20,7 +20,7 @@ def extract_next_links(url, resp):
 	next_links = list()
 
 	with open("content.txt", 'a', encoding="utf-8") as content_file:
-		if 200 <= resp.status <= 202 and resp.raw_response.headers["content_type"] == "html":
+		if 200 <= resp.status <= 202 and resp.raw_response.headers["content-type"] == "html":
 			# Add url to set of unique URLs
 			# Parsing and re-getting the url clears any formatting differences + discards fragment
 			parsed_url = urlparse(url, allow_fragments=False)
