@@ -40,7 +40,7 @@ def extract_next_links(url, resp):
 				words.append(word)
 
 	        # Write to content.txt (data formatted as: <url>|<word list>)
-	       	content_file.write(parsed_url.geturl()+'|'+str(words)+'\n')
+	        content_file.write(parsed_url.geturl()+'|'+str(words)+'\n')
 	            
 	return next_links
 
