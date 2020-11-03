@@ -4,7 +4,7 @@ import requests
 from urllib.parse import urlparse
 
 unique_urls = set() # set of unique urls
-
+project_subdomains = [".ics.uci.edu/", ".cs.uci.edu/", ".informatics.uci.edu/", ".stat.uci.edu/", "today.uci.edu/department/information_computer_sciences/"]
 def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
@@ -29,8 +29,8 @@ def extract_next_links(url, resp):
 				# Parse + format URL, removing fragment
 				formatted_tag_url = urlparse(tag_url).geturl()
 				# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
-				# TODO Also don't add url to next_links if it's not within the project subdomains
-				if not (formatted_tag_url in unique_urls):
+				# Also don't add url to next_links if it's not within the project subdomains
+				if not (formatted_tag_url in unique_urls) and any(i in formatted_tag_url for i in project_subdomains):
 					next_links.append(formatted_tag_url)
 
 			# Store all words from webpage
