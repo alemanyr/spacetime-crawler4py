@@ -4,7 +4,7 @@ import requests
 from urllib.parse import urlparse
 
 unique_urls = set() # set of unique urls
-project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu")
+project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu", "today.uci.edu")
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
