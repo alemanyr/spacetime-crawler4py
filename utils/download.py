@@ -12,7 +12,7 @@ def download(url, config, logger=None):
     if resp:
         try:
             return Response(cbor.loads(resp.content))
-        except EOFError as e:
+        except Exception as e:
             logger.error(e)
     logger.error(f"Spacetime Response error {resp} with url {url}.")
     return Response({
