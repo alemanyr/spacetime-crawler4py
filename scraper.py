@@ -75,10 +75,12 @@ def valid_domain(parsed_url):
 
 	# Check for domain: today.uci.edu/department/information_computer_sciences/ and allow it
 	if (netloc.endswith("today.uci.edu")) and ("/department/information_computer_sciences/" in parsed_url.path):
+		if "calendar" in parsed_url.path:
+			return False
 		return True
 	# Traps Crawler (keeps going to the page of the next day next day)
-	# if (netloc == "wics.ics.uci.edu") and ("/events/" in parsed_url.path):
-	# 	return False
+	if (netloc == "wics.ics.uci.edu") and ("/events/" in parsed_url.path):
+		return False
 
 	# TODO: make sure that there are no pages being skipped
 	
