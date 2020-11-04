@@ -2,9 +2,28 @@ import re
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urlparse, urljoin
+from simhash import Simhash
+
+# The simhash module is from https://github.com/1e0ng/simhash
 
 unique_urls = set() # set of unique urls
 project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu")
+stopwords = {'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", \
+"you'll", "you'd", 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', \
+'she', "she's", 'her', 'hers', 'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', \
+'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', "that'll", 'these', 'those', \
+'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', \
+'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', \
+'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', \
+'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', \
+'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', \
+'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', \
+'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', "don't", 'should', \
+"should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'couldn', "couldn't", \
+'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", \
+'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', \
+"shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't"}
+simhashes = set()
 low_content_threshold = 100
 
 def scraper(url, resp):
@@ -33,28 +52,38 @@ def extract_next_links(url, resp):
 			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 
 			# Store all words from webpage
-			words = []
-			for word in re.finditer(r"[a-zA-Z'-]*[a-zA-Z']+", soup.get_text()):
-				word = word.group(0).lower()
-				words.append(word)
+			# words = []
+			# for word in re.finditer(r"[a-zA-Z'-]*[a-zA-Z']+", soup.get_text()):
+			# 	word = word.group(0).lower()
+			# 	if word not in stopwords:
+			# 		words.append(word)
 
+			sh = Simhash(soup.get_text(), reg=r"[a-zA-Z'-]*[a-zA-Z']+")			
+			near_dupe_found = False
 			# Only scrape webpages that have high content
-			if len(words) > low_content_threshold:
-				a_tags = soup.find_all('a', href=True)
-				# Extract URLs from <a> tags + append to next_links
-				for tag in a_tags:
-					tag_url = tag.get('href')
-					formatted_tag_url = urlparse(tag_url)
-					if formatted_tag_url.scheme == '':
-						final_url = urljoin(parsed_url.geturl(), tag_url, allow_fragments=False)
-					else:
-						final_url = urlparse(tag_url, allow_fragments=False).geturl()
-					# Parse + format URL, removing fragment
-					# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
-					if not (final_url in unique_urls):
-						next_links.append(final_url)
-				# Write to content.txt (data formatted as: <url>|<word list>)
-				content_file.write(parsed_url.geturl()+'|'+str(words)+'\n')
+			if len(sh.tokens) > low_content_threshold:
+				for s in simhashes:
+					if s.distance(sh.value) < 2:
+						near_dupe_found = True
+						content_file.write(parsed_url.geturl()+'|'+'*')
+						break
+				if not near_dupe_found:
+					a_tags = soup.find_all('a', href=True)
+						# Extract URLs from <a> tags + append to next_links
+					for tag in a_tags:
+						tag_url = tag.get('href')
+						formatted_tag_url = urlparse(tag_url)
+						if formatted_tag_url.scheme == '':
+							final_url = urljoin(parsed_url.geturl(), tag_url, allow_fragments=False)
+						else:
+							final_url = urlparse(tag_url, allow_fragments=False).geturl()
+						# Parse + format URL, removing fragment
+						# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
+						if not (final_url in unique_urls):
+							next_links.append(final_url)
+					# Write to content.txt (data formatted as: <url>|<word list>)
+					content_file.write(parsed_url.geturl()+'|'+str(sh.tokens)+'\n')
+					simhashes.add(sh.value)
 			else:
 				content_file.write(parsed_url.geturl()+'|'+'*')
 		else:
@@ -67,6 +96,17 @@ def extract_next_links(url, resp):
 				
 	return next_links
 
+# Helper function for simhash from https://github.com/1e0ng/simhash
+
+def distance(v1, v2):
+        x = (v1 ^ v2) & ((1 << 64) - 1)
+        ans = 0
+        while x:
+            ans += 1
+            x &= x - 1
+        return ans
+
+
 def valid_domain(parsed_url):
 	netloc = parsed_url.netloc
 	# Use the www. stripped netloc to check for domains that are not crawlable
@@ -75,12 +115,12 @@ def valid_domain(parsed_url):
 
 	# Check for domain: today.uci.edu/department/information_computer_sciences/ and allow it
 	if (netloc.endswith("today.uci.edu")) and ("/department/information_computer_sciences/" in parsed_url.path):
-		if "/calendar/" in parsed_url.path:
-			return False
+		# if "/calendar" in parsed_url.path:
+		# 	return False
 		return True
 	# Traps Crawler (keeps going to the page of the next day next day)
-	if (netloc == "wics.ics.uci.edu") and ("/events/" in parsed_url.path):
-		return False
+	# if (netloc == "wics.ics.uci.edu") and ("/events/" in parsed_url.path):
+	# 	return False
 
 	# TODO: make sure that there are no pages being skipped
 	

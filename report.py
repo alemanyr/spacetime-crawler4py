@@ -8,11 +8,8 @@ def main():
 	ics_subdomains = defaultdict(int)
 	stop_words = set()
 	with open("content.txt", 'r', encoding='utf-8') as content_file, \
-		 open("stop_words.txt", 'r', encoding='utf-8') as stop_words_file, \
 		 open("report.txt", 'w', encoding='utf-8') as report:
 
-		for w in stop_words_file:
-			stop_words.add(w.rstrip())
 		for line in content_file:
 			num_unique_pages+=1
 			
@@ -26,7 +23,7 @@ def main():
 				longest_page = (content[0], len(words))
 
 			for word in words:
-				if word not in stop_words and len(word) > 1:
+				if len(word) > 1:
 					word_freq[word]+=1
 
 			parsed_url = urlparse(content[0])
