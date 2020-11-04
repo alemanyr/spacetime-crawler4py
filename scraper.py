@@ -5,7 +5,7 @@ from urllib.parse import urlparse, urljoin
 
 unique_urls = set() # set of unique urls
 project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu")
-low_content_threshold = 200
+low_content_threshold = 100
 
 def scraper(url, resp):
 	links = extract_next_links(url, resp)
@@ -75,7 +75,7 @@ def valid_domain(parsed_url):
 
 	# Check for domain: today.uci.edu/department/information_computer_sciences/ and allow it
 	if (netloc.endswith("today.uci.edu")) and ("/department/information_computer_sciences/" in parsed_url.path):
-		if "calendar" in parsed_url.path:
+		if "/calendar/" in parsed_url.path:
 			return False
 		return True
 	# Traps Crawler (keeps going to the page of the next day next day)
