@@ -27,6 +27,7 @@ def extract_next_links(url, resp):
 			unique_urls.add(parsed_url.geturl())
 
 			# TODO: Checking for very large files with low information value
+			
 			# TODO: Implement Similarity Checking to avoid crawling similar pages with no content
 			
 			# TODO: Make sure this redirect check works properly
@@ -60,7 +61,7 @@ def extract_next_links(url, resp):
 						next_links.append(formatted_tag_url)
 
 				
-					# Write to content.txt (data formatted as: <url>|<word list>)
+				# Write to content.txt (data formatted as: <url>|<word list>)
 				content_file.write(parsed_url.geturl()+'|'+str(words)+'\n')
 				
 	return next_links
