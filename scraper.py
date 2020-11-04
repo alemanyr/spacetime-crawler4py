@@ -5,7 +5,7 @@ from urllib.parse import urlparse, urljoin
 
 unique_urls = set() # set of unique urls
 project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu")
-low_content_threshold = 300
+low_content_threshold = 200
 
 def scraper(url, resp):
 	links = extract_next_links(url, resp)
