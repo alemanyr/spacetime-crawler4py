@@ -31,8 +31,6 @@ def extract_next_links(url, resp):
 			and (resp.status != 204):
 
 			# TODO: Checking for very large files with low information value
-
-			# TODO: Implement Similarity Checking to avoid crawling similar pages with no content
 			
 			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 
@@ -48,7 +46,7 @@ def extract_next_links(url, resp):
 			# Only scrape webpages that have high content
 			if len(sh.tokens) > low_content_threshold:
 				for s in simhashes:
-					if s.distance(sh.value) < 2:
+					if distance(s, sh.value) < 3:
 						near_dupe_found = True
 						content_file.write(parsed_url.geturl()+'|'+'*')
 						break
@@ -70,14 +68,14 @@ def extract_next_links(url, resp):
 					content_file.write(parsed_url.geturl()+'|'+str(sh.tokens)+'\n')
 					simhashes.add(sh.value)
 			else:
-				content_file.write(parsed_url.geturl()+'|'+'*')
+				content_file.write(parsed_url.geturl()+'|'+'*\n')
 		else:
 			# Check if current url is redirect
 			if resp.status == 302:
 				formatted_redirect_url = urlparse(resp.raw_response.url, allow_fragments=False).geturl()
 				if not (formatted_redirect_url in unique_urls):
 					next_links.append(formatted_redirect_url)
-			content_file.write(parsed_url.geturl()+'|'+'*')
+			content_file.write(parsed_url.geturl()+'|'+'*\n')
 				
 	return next_links
 
@@ -100,14 +98,12 @@ def valid_domain(parsed_url):
 
 	# Check for domain: today.uci.edu/department/information_computer_sciences/ and allow it
 	if (netloc.endswith("today.uci.edu")) and ("/department/information_computer_sciences/" in parsed_url.path):
-		# if "/calendar" in parsed_url.path:
+		# if not (parsed_url.path.endswith("/calendar")):
 		# 	return False
 		return True
-	# Traps Crawler (keeps going to the page of the next day next day)
+	# Traps Crawler (keeps going to the page of the next day)
 	# if (netloc == "wics.ics.uci.edu") and ("/events/" in parsed_url.path):
 	# 	return False
-
-	# TODO: make sure that there are no pages being skipped
 	
 	return any(netloc.endswith(i) for i in project_subdomains) 
 
