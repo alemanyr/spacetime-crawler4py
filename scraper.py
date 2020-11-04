@@ -101,6 +101,8 @@ def valid_domain(parsed_url):
 
 	# Check for domain: today.uci.edu/department/information_computer_sciences/ and allow it
 	if (netloc.endswith("today.uci.edu")) and ("/department/information_computer_sciences/" in parsed_url.path):
+		# if ("/calendar" in parsed_url.path) and (parsed_url.query != ""):
+		# 	return False
 		# if not (parsed_url.path.endswith("/calendar")):
 		# 	return False
 		return True
