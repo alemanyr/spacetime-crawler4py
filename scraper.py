@@ -4,7 +4,7 @@ import requests
 from urllib.parse import urlparse
 
 unique_urls = set() # set of unique urls
-project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu", "today.uci.edu")
+project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu")
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -55,7 +55,7 @@ def extract_next_links(url, resp):
 
 			# Store all words from webpage
 			words = []
-			for word in re.finditer(r"[0-9a-zA-Z'-]*[0-9a-zA-Z']+", soup.get_text()):
+			for word in re.finditer(r"[a-zA-Z'-]*[a-zA-Z']+", soup.get_text()):
 				word = word.group(0).lower()
 				words.append(word)
 				# Write to content.txt (data formatted as: <url>|<word list>)
@@ -69,6 +69,9 @@ def valid_domain(parsed_url):
 	if netloc.startswith("www."):
 		netloc = netloc.strip("www.")
 
+	# Check for domain: today.uci.edu/department/information_computer_sciences/ and allow it
+	if (netloc.endswith("today.uci.edu")) and (parsed_url.path == "/department/information_computer_sciences/"):
+		return True
 	# Traps Crawler (keeps going to the page of the next day next day)
 	if (netloc == "wics.ics.uci.edu") and ("/events/" in parsed_url.path):
 		return False
