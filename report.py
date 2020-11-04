@@ -17,13 +17,15 @@ def main():
 			num_unique_pages+=1
 			
 			content = line.rstrip().split('|')
-			words = content[1].strip('][').replace("'",'').replace('"', '').split(', ')
+			if content[1] == '*':
+				words = []
+			else:
+				words = content[1].strip('][').replace("'",'').replace('"', '').split(', ')
 
 			if len(words) > longest_page[1]:
 				longest_page = (content[0], len(words))
 
 			for word in words:
-
 				if word not in stop_words and len(word) > 1:
 					word_freq[word]+=1
 
