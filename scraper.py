@@ -17,7 +17,8 @@ def extract_next_links(url, resp):
 	with open("content.txt", 'a', encoding="utf-8") as content_file:
 		if (200 <= resp.status <= 599) \
 		    and ('text/html' in resp.raw_response.headers['content-type']) \
-		    and (resp.status != 404):
+		    and (resp.status != 404) \
+		    and (resp.status != 204):
 			
 			# Add url to set of unique URLs
 			# Parsing and re-getting the url clears any formatting differences + discards fragment
@@ -25,13 +26,10 @@ def extract_next_links(url, resp):
 			unique_urls.add(parsed_url.geturl())
 
 			# TODO: Checking for very large files with low information value
-
-			# TODO: Checking for dead links: resp.status of 200 but no content
-
 			# TODO: Implement Similarity Checking to avoid crawling similar pages with no content
-
+			
 			# TODO: Make sure this redirect check works properly
-
+			
 			# Check if current url is redirect
 			if resp.status == 302:
 				formatted_redirect_url = urlparse(resp.raw_response.url, allow_fragments=False).geturl()
@@ -74,7 +72,7 @@ def valid_domain(parsed_url):
 		return False
 
 	# TODO: make sure that there are no pages being skipped
-
+	
 	return any(netloc.endswith(i) for i in project_subdomains) 
 
 def is_valid(url):
