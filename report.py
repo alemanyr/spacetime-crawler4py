@@ -29,9 +29,8 @@ def main():
 			num_unique_pages+=1
 			
 			content = line.rstrip().split('|')
-			if len(content) < 2:
-				print(line)
-			if len(content) < 2 or content[1] == '*':
+
+			if content[1] == '*':
 				words = []
 			else:
 				words = content[1].strip('][').replace("'",'').replace('"', '').split(', ')
@@ -40,11 +39,11 @@ def main():
 				longest_page = (content[0], len(words))
 
 			for word in words:
-				if (not (word in stopwords)) and (len(word) > 2):
+				if (not (word in stopwords)) and (len(word) > 1):
 					word_freq[word]+=1
 
 			parsed_url = urlparse(content[0])
-			url_netloc = parsed_url.netloc.strip('www.')
+			url_netloc = parsed_url.netloc.strip('www.').lower()
 			if url_netloc.endswith('ics.uci.edu'):
 				ics_subdomains[url_netloc]+=1
 
@@ -56,9 +55,9 @@ def main():
 			report.write(sorted_word_freq[i][0]+'\n')
 
 		report.write("4. Number of Subdomains in ics.uci.edu Domain: "+str(len(ics_subdomains))+'\n')
-		sorted_ics_subdomains = sorted([(urlparse(sd),np) for sd,np in ics_subdomains.items()], key=lambda x: x[0].netloc)
+		sorted_ics_subdomains = sorted([(sd,np) for sd,np in ics_subdomains.items()], key=lambda x: x[0])
 		for d in sorted_ics_subdomains:
-			report.write(d[0].geturl()+', '+str(d[1])+'\n')
+			report.write(d[0]+', '+str(d[1])+'\n')
 
 
 if __name__ == "__main__":
