@@ -23,44 +23,45 @@ def extract_next_links(url, resp):
 		# Parsing and re-getting the url clears any formatting differences + discards fragment		
 		parsed_url = urlparse(url, allow_fragments=False)
 		unique_urls.add(parsed_url.geturl())	
-		if resp.raw_response != None:
-			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
+		
 		if (200 <= resp.status <= 599) \
 			and (resp.raw_response != None) \
 			and ('content-type' in resp.raw_response.headers) \
 			and ('text/html' in resp.raw_response.headers['content-type']) \
 			and (resp.status < 300) \
-			and (resp.status != 204) \
-			and bool(soup.find()):
+			and (resp.status != 204):
 
+			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 			# TODO: Checking for very large files with low information value			
-
-			sh = Simhash(soup.get_text(), reg=r"[a-zA-Z'-]*[a-zA-Z']+")			
-			near_dupe_found = False
-			# Only scrape webpages that have high content
-			if len(sh.tokens) > low_content_threshold:
-				for s in simhashes:
-					if distance(s, sh.value) < 3:
-						near_dupe_found = True
-						content_file.write(parsed_url.geturl()+'|'+'*\n')
-						break
-				if not near_dupe_found:
-					a_tags = soup.find_all('a', href=True)
-						# Extract URLs from <a> tags + append to next_links
-					for tag in a_tags:
-						tag_url = tag.get('href')
-						formatted_tag_url = urlparse(tag_url)
-						# Check if href is a relative or absolute path
-						if formatted_tag_url.scheme == '':
-							final_url = urljoin(parsed_url.geturl(), tag_url, allow_fragments=False)
-						else:
-							final_url = urlparse(tag_url, allow_fragments=False).geturl()
-						# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
-						if not (final_url in unique_urls):
-							next_links.append(final_url)
-					# Write to content.txt (data formatted as: <url>|<word list>)
-					content_file.write(parsed_url.geturl()+'|'+str(sh.tokens)+'\n')
-					simhashes.add(sh.value)	
+			if bool(soup.find()):
+				sh = Simhash(soup.get_text(), reg=r"[a-zA-Z'-]*[a-zA-Z']+")			
+				near_dupe_found = False
+				# Only scrape webpages that have high content
+				if len(sh.tokens) > low_content_threshold:
+					for s in simhashes:
+						if distance(s, sh.value) < 3:
+							near_dupe_found = True
+							content_file.write(parsed_url.geturl()+'|'+'*\n')
+							break
+					if not near_dupe_found:
+						a_tags = soup.find_all('a', href=True)
+							# Extract URLs from <a> tags + append to next_links
+						for tag in a_tags:
+							tag_url = tag.get('href')
+							formatted_tag_url = urlparse(tag_url)
+							# Check if href is a relative or absolute path
+							if formatted_tag_url.scheme == '':
+								final_url = urljoin(parsed_url.geturl(), tag_url, allow_fragments=False)
+							else:
+								final_url = urlparse(tag_url, allow_fragments=False).geturl()
+							# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
+							if not (final_url in unique_urls):
+								next_links.append(final_url)
+						# Write to content.txt (data formatted as: <url>|<word list>)
+						content_file.write(parsed_url.geturl()+'|'+str(sh.tokens)+'\n')
+						simhashes.add(sh.value)	
+				else:
+					content_file.write(parsed_url.geturl()+'|'+'*\n')
 			else:
 				content_file.write(parsed_url.geturl()+'|'+'*\n')
 		else:
