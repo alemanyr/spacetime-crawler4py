@@ -50,7 +50,7 @@ def extract_next_links(url, resp):
 							tag_url = tag.get('href')
 							formatted_tag_url = urlparse(tag_url)
 							# Check if href is a relative or absolute path
-							if formatted_tag_url.scheme == '':
+							if formatted_tag_url.scheme == '' and formatted_tag_url.netloc == '':
 								final_url = urljoin(parsed_url.geturl(), formatted_tag_url.geturl(), allow_fragments=False)
 							else:
 								final_url = urlparse(formatted_tag_url.geturl(), allow_fragments=False).geturl()
