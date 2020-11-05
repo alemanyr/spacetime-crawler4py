@@ -29,7 +29,8 @@ def main():
 			num_unique_pages+=1
 			
 			content = line.rstrip().split('|')
-
+			if len(content)!=2:
+				content.append('*')
 			if content[1] == '*':
 				words = []
 			else:

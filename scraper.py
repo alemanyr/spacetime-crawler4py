@@ -51,9 +51,9 @@ def extract_next_links(url, resp):
 							formatted_tag_url = urlparse(tag_url)
 							# Check if href is a relative or absolute path
 							if formatted_tag_url.scheme == '':
-								final_url = urljoin(parsed_url.geturl(), tag_url, allow_fragments=False)
+								final_url = urljoin(parsed_url.geturl(), formatted_tag_url.geturl(), allow_fragments=False)
 							else:
-								final_url = urlparse(tag_url, allow_fragments=False).geturl()
+								final_url = urlparse(formatted_tag_url.geturl(), allow_fragments=False).geturl()
 							# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
 							if not (final_url in unique_urls):
 								next_links.append(final_url)
