@@ -29,7 +29,9 @@ def main():
 			num_unique_pages+=1
 			
 			content = line.rstrip().split('|')
-			if content[1] == '*':
+			if len(content) < 2:
+				print(line)
+			if len(content) < 2 or content[1] == '*':
 				words = []
 			else:
 				words = content[1].strip('][').replace("'",'').replace('"', '').split(', ')
@@ -38,7 +40,7 @@ def main():
 				longest_page = (content[0], len(words))
 
 			for word in words:
-				if (not (word in stopwords)) and (len(word) > 1):
+				if (not (word in stopwords)) and (len(word) > 2):
 					word_freq[word]+=1
 
 			parsed_url = urlparse(content[0])

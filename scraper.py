@@ -56,9 +56,6 @@ def extract_next_links(url, resp):
 					for tag in a_tags:
 						tag_url = tag.get('href')
 						formatted_tag_url = urlparse(tag_url)
-						# Clear query
-						tag_url = urljoin(tag_url, urlparse(tag_url).path)
-
 						if formatted_tag_url.scheme == '':
 							final_url = urljoin(parsed_url.geturl(), tag_url, allow_fragments=False)
 						else:
