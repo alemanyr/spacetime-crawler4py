@@ -34,13 +34,6 @@ def extract_next_links(url, resp):
 			
 			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 
-			# Store all words from webpage
-			# words = []
-			# for word in re.finditer(r"[a-zA-Z'-]*[a-zA-Z']+", soup.get_text()):
-			# 	word = word.group(0).lower()
-			# 	if word not in stopwords:
-			# 		words.append(word)
-
 			sh = Simhash(soup.get_text(), reg=r"[a-zA-Z'-]*[a-zA-Z']+")			
 			near_dupe_found = False
 			# Only scrape webpages that have high content
@@ -48,7 +41,7 @@ def extract_next_links(url, resp):
 				for s in simhashes:
 					if distance(s, sh.value) < 3:
 						near_dupe_found = True
-						content_file.write(parsed_url.geturl()+'|'+'*')
+						content_file.write(parsed_url.geturl()+'|'+'*\n')
 						break
 				if not near_dupe_found:
 					a_tags = soup.find_all('a', href=True)
@@ -56,17 +49,17 @@ def extract_next_links(url, resp):
 					for tag in a_tags:
 						tag_url = tag.get('href')
 						formatted_tag_url = urlparse(tag_url)
+						# Check if href is a relative or absolute path
 						if formatted_tag_url.scheme == '':
 							final_url = urljoin(parsed_url.geturl(), tag_url, allow_fragments=False)
 						else:
 							final_url = urlparse(tag_url, allow_fragments=False).geturl()
-						# Parse + format URL, removing fragment
 						# Don't add a URL we've already visited(ie: present in unique_urls) to next_links
 						if not (final_url in unique_urls):
 							next_links.append(final_url)
 					# Write to content.txt (data formatted as: <url>|<word list>)
 					content_file.write(parsed_url.geturl()+'|'+str(sh.tokens)+'\n')
-					simhashes.add(sh.value)
+					simhashes.add(sh.value)	
 			else:
 				content_file.write(parsed_url.geturl()+'|'+'*\n')
 		else:
@@ -96,18 +89,19 @@ def valid_domain(parsed_url):
 	if netloc.startswith("www."):
 		netloc = netloc.strip("www.")
 
+	valid = False
 	# Check for domain: today.uci.edu/department/information_computer_sciences/ and allow it
 	if (netloc.endswith("today.uci.edu")) and ("/department/information_computer_sciences/" in parsed_url.path):
-		# if ("/calendar" in parsed_url.path) and (parsed_url.query != ""):
-		# 	return False
-		# if not (parsed_url.path.endswith("/calendar")):
-		# 	return False
-		return True
-	# Traps Crawler (keeps going to the page of the next day)
-	# if (netloc == "wics.ics.uci.edu") and ("/events/" in parsed_url.path):
-	# 	return False
-	
-	return any(netloc.endswith(i) for i in project_subdomains) 
+		valid = True
+
+	# Check if domain in allowed project domains
+	elif any(netloc.endswith(i) for i in project_subdomains):
+		valid = True
+
+	# Filter out urls with queries
+	if (parsed_url.query != ""):
+		valid = False
+	return valid
 
 def is_valid(url):
 	try:
