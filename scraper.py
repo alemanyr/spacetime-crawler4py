@@ -110,8 +110,6 @@ def is_valid(url):
 		parsed_query = parsed.query.lower()
 		if parsed.fragment != '':
 			return False
-		# if "action=" in parsed_query:
-		#     return False
 		if parsed.scheme not in set(["http", "https"]):
 			return False
 		if not valid_domain(parsed):
@@ -126,7 +124,7 @@ def is_valid(url):
 			+ r"|thmx|mso|arff|rtf|jar|csv"
 			+ r"|rm|smil|wmv|swf|wma|zip|rar|gz"
 			+ r"|ppsx|r|java|in|py|scm|rkt|txt"
-			+ r"|svg|ss|odc|sas|war|rmd|ds|img|apk)$", parsed_path) \
+			+ r"|svg|ss|odc|sas|war|rmd|ds|img|apk|cp|z|lsp|pov)$", parsed_path) \
 			or re.match(
 			r".*\.(css|js|bmp|gif|jpe?g|ico"
 			+ r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -137,7 +135,7 @@ def is_valid(url):
 			+ r"|thmx|mso|arff|rtf|jar|csv"
 			+ r"|rm|smil|wmv|swf|wma|zip|rar|gz"
 			+ r"|ppsx|r|java|in|py|scm|rkt|txt"
-			+ r"|svg|ss|odc|sas|war|rmd|ds|img|apk)$", parsed_query))
+			+ r"|svg|ss|odc|sas|war|rmd|ds|img|apk|cp|z|lsp|pov)$", parsed_query))
 
 	except TypeError:
 		print ("TypeError for ", parsed)
