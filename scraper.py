@@ -23,16 +23,16 @@ def extract_next_links(url, resp):
 		# Parsing and re-getting the url clears any formatting differences + discards fragment		
 		parsed_url = urlparse(url, allow_fragments=False)
 		unique_urls.add(parsed_url.geturl())	
+		soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 		if (200 <= resp.status <= 599) \
 			and (resp.raw_response != None) \
 			and ('content-type' in resp.raw_response.headers) \
 			and ('text/html' in resp.raw_response.headers['content-type']) \
 			and (resp.status < 300) \
-			and (resp.status != 204):
+			and (resp.status != 204) \
+			and bool(soup.find()):
 
 			# TODO: Checking for very large files with low information value
-			
-			soup = BeautifulSoup(resp.raw_response.content, 'html.parser')
 
 			sh = Simhash(soup.get_text(), reg=r"[a-zA-Z'-]*[a-zA-Z']+")			
 			near_dupe_found = False
