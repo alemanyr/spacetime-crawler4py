@@ -26,7 +26,6 @@ def main():
 		 open("report.txt", 'w', encoding='utf-8') as report:
 
 		for line in content_file:
-			num_unique_pages+=1
 			
 			content = line.rstrip().split('|')
 			if len(content)!=2:
@@ -34,6 +33,7 @@ def main():
 			if content[1] == '*':
 				words = []
 			else:
+				num_unique_pages+=1
 				words = content[1].strip('][').replace("'",'').replace('"', '').split(', ')
 
 			if len(words) > longest_page[1]:

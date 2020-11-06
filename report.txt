@@ -4,7 +4,7 @@ Group Members:
 23077304 Vince Cerda
 30972707 Bao Tran
 
-1. Number of Unique Pages: 13037
+1. Number of Unique Pages: 6917
 2. Longest Page: http://www.ics.uci.edu/~eppstein/junkyard/all.html with 23344 words
 3. 50 Most Common Words
 research

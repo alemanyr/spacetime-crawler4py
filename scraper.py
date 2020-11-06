@@ -100,7 +100,7 @@ def valid_domain(parsed_url):
 	elif any(netloc.endswith(i) for i in project_subdomains):
 		valid = True
 
-	# Filter out urls with queries
+	Filter out urls with queries
 	if (parsed_url.query != ""):
 		valid = False
 	return valid
@@ -126,7 +126,7 @@ def is_valid(url):
 			+ r"|thmx|mso|arff|rtf|jar|csv"
 			+ r"|rm|smil|wmv|swf|wma|zip|rar|gz"
 			+ r"|ppsx|r|java|in|py|scm|rkt|txt"
-			+ r"|svg|ss|odc|sas|war|rmd|ds|img|apk|cp|z|lsp|pov)$", parsed_path) \
+			+ r"|svg|ss|odc|sas|war|rmd|ds|img|apk|cp|z|lsp|pov|mpg)$", parsed_path) \
 			or re.match(
 			r".*\.(css|js|bmp|gif|jpe?g|ico"
 			+ r"|png|tiff?|mid|mp2|mp3|mp4"
@@ -137,7 +137,7 @@ def is_valid(url):
 			+ r"|thmx|mso|arff|rtf|jar|csv"
 			+ r"|rm|smil|wmv|swf|wma|zip|rar|gz"
 			+ r"|ppsx|r|java|in|py|scm|rkt|txt"
-			+ r"|svg|ss|odc|sas|war|rmd|ds|img|apk|cp|z|lsp|pov)$", parsed_query))
+			+ r"|svg|ss|odc|sas|war|rmd|ds|img|apk|cp|z|lsp|pov|mpg)$", parsed_query))
 
 	except TypeError:
 		print ("TypeError for ", parsed)
