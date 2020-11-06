@@ -9,7 +9,7 @@ from simhash import Simhash
 unique_urls = set() # set of unique urls
 project_subdomains = ("ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu")
 simhashes = set()
-low_content_threshold = 100
+low_content_threshold = 200
 
 def scraper(url, resp):
 	links = extract_next_links(url, resp)
@@ -100,7 +100,7 @@ def valid_domain(parsed_url):
 	elif any(netloc.endswith(i) for i in project_subdomains):
 		valid = True
 
-	Filter out urls with queries
+	# Filter out urls with queries
 	if (parsed_url.query != ""):
 		valid = False
 	return valid
